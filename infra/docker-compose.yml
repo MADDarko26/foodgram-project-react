@@ -18,13 +18,6 @@ services:
     env_file:
       - ./.env
 
-  frontend:
-    image: maddarko/infra_frontend
-    volumes:
-      - ../frontend/:/app/result_build/
-    depends_on:
-      - db
-
   nginx:
     image: nginx:1.19.3
     ports:
