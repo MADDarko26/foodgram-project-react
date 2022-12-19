@@ -70,6 +70,7 @@ jobs:
           script: |
             sudo docker compose stop
             sudo docker compose rm foodgram-back
+            sudo docker compose rm foodgram-front
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-back:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-front:latest
             rm .env
