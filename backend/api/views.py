@@ -46,18 +46,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk=None):
         if request.method == 'GET':
             return self.add_obj(Favorite, request.user, pk)
-        elif request.method == 'DELETE':
-            return self.delete_obj(Favorite, request.user, pk)
-        return None
+        return self.delete_obj(Favorite, request.user, pk)
+
 
     @action(detail=True, methods=['get', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
         if request.method == 'GET':
             return self.add_obj(Cart, request.user, pk)
-        elif request.method == 'DELETE':
-            return self.delete_obj(Cart, request.user, pk)
-        return None
+        return self.delete_obj(Cart, request.user, pk)
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
