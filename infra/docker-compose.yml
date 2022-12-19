@@ -8,7 +8,7 @@ services:
       - ./.env
 
   backend:
-    image: maddarko/infra_backend:latest
+    image: maddarko/foodgram-back:latest
     restart: always
     volumes:
       - static_value:/code/static/
@@ -19,7 +19,7 @@ services:
       - ./.env
 
   frontend:
-    image: maddarko/infra_frontend:latest
+    image: maddarko/foodgram-front:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
