@@ -62,7 +62,6 @@ jobs:
           script: |
             sudo docker compose stop
             sudo docker compose rm infra_backend
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/infra_frontend
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/infra_backend:latest
             rm .env
             touch .env
