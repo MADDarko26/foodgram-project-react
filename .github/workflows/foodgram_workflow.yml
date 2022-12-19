@@ -60,10 +60,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            sudo docker compose stop
+            sudo docker compose rm infra_backend
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/infra_frontend
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/infra_backend
-            sudo docker-compose stop
-            sudo docker-compose rm backend
             rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -73,7 +73,7 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             echo DJ_SECRET_KEY=${{ secrets.DJ_SECRET_KEY }} >> .env
-            sudo docker-compose up -d
+            sudo docker compose up -d
   
   telegram_message:
     name: Send telegram message
