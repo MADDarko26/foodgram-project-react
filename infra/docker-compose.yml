@@ -19,7 +19,7 @@ services:
       - ./.env
 
   frontend:
-    image: maddarko/foodgram-frontend:latest
+    image: maddarko/infra_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
