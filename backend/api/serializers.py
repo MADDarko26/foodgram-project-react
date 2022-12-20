@@ -1,6 +1,7 @@
-from api.models import Ingredient, IngredientAmount, Recipe, Tag
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import Ingredient, IngredientAmount, Recipe, Tag
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import Follow
@@ -90,7 +91,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
-            IngredientAmount.objects.create(
+            IngredientAmount.objects.bulk_create(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount'),
@@ -159,4 +160,6 @@ class FollowSerializer(serializers.ModelSerializer):
         return CropRecipeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.author).count()
+        return Recipe.objects.annotate(
+            author=Count('authors')
+        ).filter(author=obj.author)
