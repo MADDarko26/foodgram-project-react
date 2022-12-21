@@ -1,7 +1,8 @@
 from django.db.models import Count, Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Favorite, Ingredient, IngredientAmount, Recipe, Tag, Cart
+from recipes.models import (Cart, Favorite, Ingredient, IngredientAmount,
+                            Recipe, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import Follow
