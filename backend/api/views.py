@@ -1,3 +1,4 @@
+from django.db.models import Exists, OuterRef
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from recipes.models import (Cart, Favorite, Ingredient, IngredientAmount,
@@ -33,11 +34,23 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.prefetch_related('ingredients')
     serializer_class = RecipeSerializer
     pagination_class = LimitPageNumberPagination
     filter_class = AuthorAndTagFilter
     permission_classes = [IsAuthorOrReadOnly]
+
+    def get_queryset(self):
+        return Recipe.objects.prefetch_related(
+            'ingredients', 'tags'
+        ).annotate(
+            is_favorite=Exists(
+                Favorite.objects.filter(
+                    user=self.request.user, recipe=OuterRef("id")
+                ))).annotate(
+                    is_in_shopping_cart=Exists(
+                        Cart.objects.filter(
+                            user=self.request.user, recipe=OuterRef("id")
+                        )))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

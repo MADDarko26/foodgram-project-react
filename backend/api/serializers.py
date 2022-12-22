@@ -1,8 +1,7 @@
-from django.db.models import Count, Exists, OuterRef
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import (Cart, Favorite, Ingredient, IngredientAmount,
-                            Recipe, Tag)
+from recipes.models import Ingredient, IngredientAmount, Recipe, Tag
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import Follow
@@ -48,34 +47,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True,
     )
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.BooleanField()
+    is_in_shopping_cart = serializers.BooleanField()
 
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
-
-    def get_is_favorited(self, obj):
-        user = self.context.get('request').user
-        recept = Favorite.objects.filter(
-            Recipe=OuterRef(obj.id),
-            favorites__user=user
-        )
-        if user.is_anonymous:
-            return False
-        return Recipe.objects.annotate(recept=Exists(recept))
-
-    def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        carts = Cart.objects.filter(
-            Recipe=OuterRef(obj.id),
-            cart__user=user
-        )
-        if user.is_anonymous:
-            return False
-        return Recipe.objects.annotate(carts=Exists(carts))
 
     def validate(self, data):
         ingredients = self.initial_data.get('ingredients')
@@ -99,12 +78,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            IngredientAmount.objects.bulk_create(
+        temp_data = [
+            IngredientAmount(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount'),
             )
+            for ingredient in ingredients
+        ]
+        IngredientAmount.objects.bulk_create(temp_data)
 
     def create(self, validated_data):
         image = validated_data.pop('image')
@@ -146,19 +128,14 @@ class FollowSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='author.username')
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.BooleanField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Follow
         fields = ('id', 'email', 'username', 'first_name', 'last_name',
-                  'is_subscribed', 'recipes', 'recipes_count')
-
-    def get_is_subscribed(self, obj):
-        return Follow.objects.filter(
-            user=obj.user, author=obj.author
-        ).exists()
+                  'is_subscribed', 'recipes', 'recipes_count'))
 
     def get_recipes(self, obj):
         request = self.context.get('request')
