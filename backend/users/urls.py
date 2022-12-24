@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from users.views import CustomUserViewSet
 
-app_name = 'api'
+app_name = 'api_users'
 
 router = DefaultRouter()
 router.register('users', CustomUserViewSet, basename='users')
