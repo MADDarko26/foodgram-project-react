@@ -47,11 +47,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         is_in_shopping_cart = Cart.objects.filter(
             user=self.request.user, recipe=OuterRef("id")
         )
-        is_subscribed = User.objects.annotate(
-            is_subscribed=Exists(
-                Follow.objects.filter(
-                    user=self.request.user, author=OuterRef("id")
-                )))
         if self.request.user.is_anonymous():
             return Recipe.objects.prefetch_related(
                 'ingredients', 'tags'
@@ -62,9 +57,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             favorite=Exists(is_favorite
                             )).annotate(
             shopping_cart=Exists(is_in_shopping_cart
-                                 )).annotate(
-            subscribed=Exists(is_subscribed)
-        )
+                                 ))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
