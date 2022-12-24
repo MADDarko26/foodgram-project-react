@@ -16,6 +16,13 @@ User = get_user_model()
 class CustomUserViewSet(UserViewSet):
     pagination_class = LimitPageNumberPagination
 
+    def get_queryset(self):
+        user = get_object_or_404(User, id=self.request.user.id)
+        is_subscribed = Follow.objects.filter(user=user, author=OuterRef('id'))
+        return User.objects.annotate(
+            is_subscribed=Exists(is_subscribed)
+        )
+
     @action(detail=True, permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
         user = request.user
