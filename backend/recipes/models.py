@@ -6,10 +6,14 @@ User = get_user_model()
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=200,
-                            verbose_name='Название ингредиента')
-    measurement_unit = models.CharField(max_length=200,
-                                        verbose_name='Единица измерения')
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название ингредиента'
+    )
+    measurement_unit = models.CharField(
+        max_length=200,
+        verbose_name='Единица измерения'
+    )
 
     class Meta:
         ordering = ['-id']
@@ -38,12 +42,22 @@ class Tag(models.Model):
         (PURPLE, 'Фиолетовый'),
         (YELLOW, 'Желтый'),
     ]
-    name = models.CharField(max_length=200, unique=True,
-                            verbose_name='Название тега')
-    color = models.CharField(max_length=7, unique=True, choices=COLOR_CHOICES,
-                             verbose_name='Цвет в HEX')
-    slug = models.SlugField(max_length=200, unique=True,
-                            verbose_name='Уникальный слаг')
+    name = models.CharField(
+        max_length=200,
+        unique=True,
+        verbose_name='Название тега'
+    )
+    color = models.CharField(
+        max_length=7,
+        unique=True,
+        choices=COLOR_CHOICES,
+        verbose_name='Цвет в HEX'
+    )
+    slug = models.SlugField(
+        max_length=200,
+        unique=True,
+        verbose_name='Уникальный слаг'
+    )
 
     class Meta:
         ordering = ['-id']
@@ -55,13 +69,20 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               related_name='recipes',
-                               verbose_name='Автор рецепта')
-    name = models.CharField(max_length=200,
-                            verbose_name='Название рецепта')
-    image = models.ImageField(upload_to='recipes/',
-                              verbose_name='Картинка рецепта')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='Автор рецепта'
+    )
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название рецепта'
+    )
+    image = models.ImageField(
+        upload_to='recipes/',
+        verbose_name='Картинка рецепта'
+    )
     text = models.TextField(verbose_name='Описание рецепта')
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -76,7 +97,9 @@ class Recipe(models.Model):
     cooking_time = models.PositiveSmallIntegerField(
         validators=(
             validators.MinValueValidator(
-                1, message='Минимальное время приготовления 1 минута'),),
+                1,
+                message='Минимальное время приготовления 1 минута'),
+        ),
         verbose_name='Время приготовления')
 
     class Meta:
