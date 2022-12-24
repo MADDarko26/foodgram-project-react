@@ -11,7 +11,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from users.models import Follow, User
 
 from .filters import AuthorAndTagFilter, IngredientSearchFilter
 from .pagination import LimitPageNumberPagination
