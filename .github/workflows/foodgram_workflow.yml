@@ -83,9 +83,6 @@ jobs:
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             echo DJ_SECRET_KEY=${{ secrets.DJ_SECRET_KEY }} >> .env
             sudo docker compose up -d
-            sudo docker compose exec backend python manage.py collectstatic --noinput
-            sudo docker compose exec backend python manage.py migrate --noinput
-            sudo docker compose exec backend python manage.py load_ingredients
   
   telegram_message:
     name: Send telegram message
