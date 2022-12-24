@@ -40,17 +40,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrReadOnly]
 
     def get_queryset(self):
+        is_favorite = Favorite.objects.filter(
+            user=self.request.user, recipe=OuterRef("id")
+        )
+        is_in_shopping_cart = Cart.objects.filter(
+            user=self.request.user, recipe=OuterRef("id")
+        )
+        if self.request.user.is_anonymous():
+            return Recipe.objects.prefetch_related(
+                'ingredients', 'tags'
+            )
         return Recipe.objects.prefetch_related(
             'ingredients', 'tags'
         ).annotate(
-            is_favorite=Exists(
-                Favorite.objects.filter(
-                    user=self.request.user, recipe=OuterRef("id")
-                ))).annotate(
-                    is_in_shopping_cart=Exists(
-                        Cart.objects.filter(
-                            user=self.request.user, recipe=OuterRef("id")
-                        )))
+            favorite=Exists(is_favorite
+                            )).annotate(
+            shopping_cart=Exists(is_in_shopping_cart
+                                 ))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
