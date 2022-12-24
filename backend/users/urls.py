@@ -5,7 +5,7 @@ from users.views import CustomUserViewSet
 app_name = 'api'
 
 router = DefaultRouter()
-router.register('users', CustomUserViewSet)
+router.register('users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
