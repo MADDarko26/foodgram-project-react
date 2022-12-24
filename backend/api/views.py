@@ -49,10 +49,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Recipe.objects.prefetch_related(
             'ingredients', 'tags'
         ).annotate(
-                favorite=Exists(is_favorite
-                                )).annotate(
-                shopping_cart=Exists(is_in_shopping_cart
-                                     ))
+            favorite=Exists(is_favorite
+                            )).annotate(
+            shopping_cart=Exists(is_in_shopping_cart
+                                 ))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
