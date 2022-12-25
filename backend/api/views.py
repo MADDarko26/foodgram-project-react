@@ -41,7 +41,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['get', 'delete'],
+    @action(detail=True, methods=['delete', 'post'],
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         if request.method == 'GET':
@@ -50,7 +50,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.delete_obj(Favorite, request.user, pk)
         return None
 
-    @action(detail=True, methods=['get', 'delete'],
+    @action(detail=True, methods=['delete', 'post'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
         if request.method == 'GET':
