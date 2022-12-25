@@ -1,12 +1,8 @@
-from api.filters import AuthorAndTagFilter, IngredientSearchFilter
-from api.models import (Cart, Favorite, Ingredient, IngredientAmount, Recipe,
-                        Tag)
-from api.pagination import LimitPageNumberPagination
-from api.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
-from api.serializers import (CropRecipeSerializer, IngredientSerializer,
-                             RecipeSerializer, TagSerializer)
+from django.db.models import Exists, OuterRef
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from recipes.models import (Cart, Favorite, Ingredient, IngredientAmount,
+                            Recipe, Tag)
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
@@ -15,6 +11,13 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from users.models import Follow, User
+
+from .filters import AuthorAndTagFilter, IngredientSearchFilter
+from .pagination import LimitPageNumberPagination
+from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from .serializers import (CropRecipeSerializer, IngredientSerializer,
+                          RecipeSerializer, TagSerializer)
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -36,7 +39,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     pagination_class = LimitPageNumberPagination
     filter_class = AuthorAndTagFilter
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthorOrReadOnly]
+
+    def get_queryset(self):
+
+        is_favorite = Favorite.objects.filter(
+            user=self.request.user, recipe=OuterRef("id")
+        )
+        is_in_shopping_cart = Cart.objects.filter(
+            user=self.request.user, recipe=OuterRef("id")
+        )
+        is_subscribed = User.objects.annotate(
+            is_subscribed=Exists(
+                Follow.objects.filter(
+                    user=self.request.user, author=OuterRef("id")
+                )))
+        if self.request.user.is_anonymous():
+            return Recipe.objects.prefetch_related(
+                'ingredients', 'tags'
+            )
+        return Recipe.objects.prefetch_related(
+            'ingredients', 'tags'
+        ).annotate(
+            favorite=Exists(is_favorite
+                            )).annotate(
+            shopping_cart=Exists(is_in_shopping_cart
+                                 )).annotate(
+            subscribed=Exists(is_subscribed)
+        )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
