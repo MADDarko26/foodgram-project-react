@@ -1,7 +1,6 @@
 from api.pagination import LimitPageNumberPagination
 from api.serializers import FollowSerializer
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, OuterRef
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -56,11 +55,7 @@ class CustomUserViewSet(UserViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         user = request.user
-        queryset = User.objects.annotate(
-            is_subscribed=Exists(
-                Follow.objects.filter(
-                    user=user, author=OuterRef("id")
-                )))
+        queryset = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
             pages,
